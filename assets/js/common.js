@@ -817,6 +817,8 @@ var getStateCodeTable = function() {
 			for (var i = 1; i < 24; i++) {
 				if (i !== 17) {
 					worksheet.rows(i).cells(6).cellFormat().fill($.ig.excel.CellFill.createSolidFill('#92D050'));
+				} else {
+					worksheet.rows(i).cells(6).cellFormat().fill($.ig.excel.CellFill.createSolidFill('#D7E4BC'));
 				}
 			}
 
@@ -1019,8 +1021,8 @@ var getStateCodeTable = function() {
 			var self = this;
 
 			worksheet.columns(0).setWidth(18, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(0).setWidth(3.14, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(0).setWidth(8.14, $.ig.excel.WorksheetColumnWidthUnit.character);
+			worksheet.columns(1).setWidth(3.14, $.ig.excel.WorksheetColumnWidthUnit.character);
+			worksheet.columns(2).setWidth(8.14, $.ig.excel.WorksheetColumnWidthUnit.character);
 
 			for (var i = 0; i < stateCodes.length; i++) {
 				for (var j = 0; j < stateCodes[i].length; j++) {
