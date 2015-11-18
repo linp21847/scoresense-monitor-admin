@@ -147,6 +147,7 @@ var getStateCodeTable = function() {
 				closedAccounts = self.cluster.closed,
 				installmentAccounts = self.cluster.installment,
 				curRowIndex = 0,
+				personal = self.personal,
 				formattedString = new $.ig.excel.FormattedString( "Formatted String" ),
 				setCurrencyModeToCell = function(cell, value) {
 					balanceCellFormat = cell.cellFormat();
@@ -154,9 +155,9 @@ var getStateCodeTable = function() {
 					cell.value(parseInt(value));
 				},
 				getAccountStatus = function(remarkString) {
-					if (remarkString.indexOf("paid") > -1)
+					if (remarkString.toLowerCase().indexOf("paid") > -1)
 						return "Paid";
-					else if (remarkString.indexOf("Closed") > -1)
+					else if (remarkString.toLowerCase().indexOf("closed") > -1)
 						return "Closed";
 					else
 						return "Paid";
@@ -169,31 +170,65 @@ var getStateCodeTable = function() {
 					cell.value(value);
 				},
 				setTableHeadModeToCell = function(cell, value) {
-					cellFormat = cell.cellFormat();
-					cellFormat.alignment($.ig.excel.HorizontalCellAlignment.left);
-					cellFormat.font().bold(true);
-					cellFormat.fill($.ig.excel.CellFill.createSolidFill('#8DB4E3'));
+					format = cell.cellFormat();
+					format.alignment($.ig.excel.HorizontalCellAlignment.left);
+					format.font().bold(true);
+					format.fill($.ig.excel.CellFill.createSolidFill('#8DB4E3'));
+					format.topBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+					format.rightBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+					format.bottomBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+					format.leftBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
 					cell.value(value);
-				}
+				},
+				fillGreenToCell = function(cell) {
+					format = cell.cellFormat();
+					format.fill($.ig.excel.CellFill.createSolidFill('#DBEEF3'));
+					format.topBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+					format.rightBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+					format.bottomBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+					format.leftBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+					return cell;
+				},
+				fillYellowToCell = function(cell) {
+					format = cell.cellFormat();
+					format.fill($.ig.excel.CellFill.createSolidFill('#FFFF00'));
+					format.topBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+					format.rightBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+					format.bottomBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+					format.leftBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+					return cell;
+				},
+				drawBorderToCells = function(r1, c1, r2, c2) {
+					for (var i = r1; i < r2 + 1; i ++) {
+						for (var j = c1; j < c2 + 1; j ++) {
+							format = worksheet.rows(i).cells(j).cellFormat();
+
+							format.topBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+							format.rightBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+							format.bottomBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+							format.leftBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+						}
+					}
+				};
 
 			//	Column Width Config
-			worksheet.columns(0).setWidth(17.14, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(1).setWidth(10.29, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(2).setWidth(17.29, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(3).setWidth(15.71, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(4).setWidth(12.71, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(5).setWidth(14, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(6).setWidth(14.14, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(7).setWidth(7.57, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(8).setWidth(15.43, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(9).setWidth(12.71, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(10).setWidth(10.14, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(11).setWidth(11, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(12).setWidth(12.14, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(13).setWidth(10.71, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(14).setWidth(10, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(15).setWidth(10, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(16).setWidth(10, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(0).setWidth(17.14, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(1).setWidth(10.29, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(2).setWidth(17.29, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(3).setWidth(15.71, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(4).setWidth(12.71, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(5).setWidth(14, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(6).setWidth(14.14, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(7).setWidth(7.57, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(8).setWidth(15.43, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(9).setWidth(12.71, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(10).setWidth(10.14, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(11).setWidth(11, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(12).setWidth(12.14, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(13).setWidth(10.71, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(14).setWidth(10, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(15).setWidth(10, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(16).setWidth(10, $.ig.excel.WorksheetColumnWidthUnit.character);
 
 			//	Rows 0 - Bank Accounts Section...
 				bankCardsTitle = worksheet.mergedCellsRegions().add(0, 0, 0, 4);
@@ -228,7 +263,7 @@ var getStateCodeTable = function() {
 					tmpCell.cellFormat().formatString("0%");
 					tmpCell.applyFormula("=B" + (curRowIndex+1) + "/C" + (curRowIndex+1));
 					worksheet.rows(curRowIndex).cells(4).applyFormula("=IF(C" + (curRowIndex+1) + "<=1000,B" + (curRowIndex+1) + ",IF(D" + (curRowIndex+1) + "<0.4,0,B" + (curRowIndex+1) + "-(C" + (curRowIndex+1) + "*0.4)))");
-					worksheet.rows(curRowIndex).cells(5).applyFormula("=B" + (curRowIndex+1) + "-E" + (curRowIndex+1));
+					fillGreenToCell(worksheet.rows(curRowIndex).cells(5)).applyFormula("=B" + (curRowIndex+1) + "-E" + (curRowIndex+1));
 					worksheet.rows(curRowIndex).cells(6).value(bankAccounts[i].accountNumber);
 					worksheet.rows(curRowIndex).cells(8).value(bankAccounts[i].highBalance);
 					tmpCell = worksheet.rows(curRowIndex).cells(9);
@@ -243,6 +278,10 @@ var getStateCodeTable = function() {
 					curRowIndex++;
 				}
 				bankAccountEndIndex = curRowIndex;
+
+				drawBorderToCells(bankAccountStartIndex - 2, 0, bankAccountEndIndex - 1, 6);
+				drawBorderToCells(bankAccountStartIndex - 2, 8, bankAccountEndIndex - 1, 9);
+				drawBorderToCells(bankAccountStartIndex - 2, 11, bankAccountEndIndex - 1, 16);
 
 			//	Rows 1+(bank accounts count) - Retail Cards Section...
 				bankCardsTitle = worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4);
@@ -276,31 +315,41 @@ var getStateCodeTable = function() {
 			//	Summary Line
 				summaryLineIndex = curRowIndex + 1;
 				setTitleModeToCell(worksheet.rows(curRowIndex).cells(0), "SUM:");
-				worksheet.rows(curRowIndex).cells(1).applyFormula("=SUM(B3:B" + bankAccountEndIndex + ",B" + retailCardStartIndex + ":B" + retailCardEndIndex + ")");
-				worksheet.rows(curRowIndex).cells(2).applyFormula("=SUM(C3:C" + bankAccountEndIndex + ",C" + retailCardStartIndex + ":C" + retailCardEndIndex + ")");
+				fillYellowToCell(worksheet.rows(curRowIndex).cells(1)).applyFormula("=SUM(B3:B" + bankAccountEndIndex + ",B" + retailCardStartIndex + ":B" + retailCardEndIndex + ")");
+				fillYellowToCell(worksheet.rows(curRowIndex).cells(2)).applyFormula("=SUM(C3:C" + bankAccountEndIndex + ",C" + retailCardStartIndex + ":C" + retailCardEndIndex + ")");
 				setTitleModeToCell(worksheet.rows(curRowIndex).cells(3), "Total Amt to Pay:");
-				worksheet.rows(curRowIndex).cells(4).applyFormula("=SUM(E3:E" + bankAccountEndIndex + ",E" + retailCardStartIndex + ":E" + retailCardEndIndex + ")");
+				fillYellowToCell(worksheet.rows(curRowIndex).cells(4)).applyFormula("=SUM(E3:E" + bankAccountEndIndex + ",E" + retailCardStartIndex + ":E" + retailCardEndIndex + ")");
 				curRowIndex += 2;
 
 				//	4 + bankAccounts.length
 				setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(2), "Debt to credit ratio");
-				worksheet.rows(curRowIndex).cells(3).applyFormula("=MAX(E3:E" + bankAccountEndIndex + ",E" + retailCardStartIndex + ":E" + retailCardEndIndex + ")");
+				fillYellowToCell(worksheet.rows(curRowIndex).cells(3)).applyFormula("=MAX(E3:E" + bankAccountEndIndex + ",E" + retailCardStartIndex + ":E" + retailCardEndIndex + ")");
 				self.summaryLineIndex = curRowIndex + 1;
 
 				setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(8), "Highest Balance Held Ratio");
-				worksheet.rows(curRowIndex).cells(9).applyFormula("=MAX(J3:J" + bankAccountEndIndex + ",J" + retailCardStartIndex + ":J" + retailCardEndIndex + ")");
+				fillYellowToCell(worksheet.rows(curRowIndex).cells(9)).applyFormula("=MAX(J3:J" + bankAccountEndIndex + ",J" + retailCardStartIndex + ":J" + retailCardEndIndex + ")");
 
 				setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(12), "Oldest Account");
-				worksheet.rows(curRowIndex).cells(13).applyFormula("=MAX(M3:M" + bankAccountEndIndex + ",M" + retailCardStartIndex + ":M" + retailCardEndIndex + ")");
+				fillYellowToCell(worksheet.rows(curRowIndex).cells(13)).applyFormula("=MAX(M3:M" + bankAccountEndIndex + ",M" + retailCardStartIndex + ":M" + retailCardEndIndex + ")");
 				curRowIndex += 2;
 
 				//	Aggregate line
 				setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(2), "Aggregate ");
 				worksheet.rows(curRowIndex).cells(3).cellFormat().formatString("0%");
-				worksheet.rows(curRowIndex).cells(3).applyFormula("=B" + summaryLineIndex + "/C" + summaryLineIndex);
+				fillYellowToCell(worksheet.rows(curRowIndex).cells(3)).applyFormula("=B" + summaryLineIndex + "/C" + summaryLineIndex);
 				curRowIndex += 2;
 
+			drawBorderToCells(bankAccountEndIndex, 0, bankAccountEndIndex + 3, 6);
+			drawBorderToCells(bankAccountEndIndex, 8, bankAccountEndIndex + 3, 9);
+			drawBorderToCells(bankAccountEndIndex, 11, bankAccountEndIndex + 3, 16);
+
 			//	Closed Accounts With Balances and/or Lates line
+				bankCardsTitle = worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4);
+				setTitleModeToCell(bankCardsTitle, "Closed Accounts With Balances and/or Lates");
+				curRowIndex++;
+
+				var closedAccountStartIndex = curRowIndex;
+
 				setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Account Name");
 				setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(1), "Account Type");
 				setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(2), "Balance");
@@ -323,7 +372,7 @@ var getStateCodeTable = function() {
 					setCurrencyModeToCell(worksheet.rows(curRowIndex).cells(2), item.balance);
 					worksheet.rows(curRowIndex).cells(3).value(item.accountNumber);
 					worksheet.rows(curRowIndex).cells(4).value(item.payStatus);
-					worksheet.rows(curRowIndex).cells(5).value(getAccountStatus(item.remark));
+					fillGreenToCell(worksheet.rows(curRowIndex).cells(5)).value(getAccountStatus(item.remark));
 
 					worksheet.rows(curRowIndex).cells(8).value(item.opened);
 					worksheet.rows(curRowIndex).cells(9).value(item.reported);
@@ -334,10 +383,19 @@ var getStateCodeTable = function() {
 					curRowIndex++;
 				}
 
+				var closedAccountEndIndex = curRowIndex;
+
+				drawBorderToCells(closedAccountStartIndex, 0, closedAccountEndIndex - 1, 5);
+				drawBorderToCells(closedAccountStartIndex, 8, closedAccountEndIndex - 1, 13);
+
 			//	Authorized User Accounts
 				bankCardsTitle = worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4);
 				setTitleModeToCell(bankCardsTitle, "Authorized User Accounts");
 				curRowIndex++;
+
+				authorizedAccountStartIndex = curRowIndex;
+
+				drawBorderToCells(authorizedAccountStartIndex, 0, authorizedAccountStartIndex + 1, 6);
 
 				//	Rows 
 				setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Account Name");
@@ -363,6 +421,8 @@ var getStateCodeTable = function() {
 				setTitleModeToCell(installmentAccountTitle, "Installment Accounts");
 				curRowIndex++;
 
+				installmentAccountStartIndex = curRowIndex;
+
 				setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Account Name");
 				setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(1), "Type of Loan");
 				setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(2), "Balance");
@@ -383,10 +443,35 @@ var getStateCodeTable = function() {
 					worksheet.rows(curRowIndex).cells(6).value(item.latePayments['30'] + ',' + item.latePayments['60'] + ',' + item.latePayments['90']);
 					curRowIndex++;
 				}
+
+				installmentAccountEndIndex = curRowIndex;
+				drawBorderToCells(installmentAccountStartIndex, 0, installmentAccountEndIndex - 1, 6);
+				drawBorderToCells(authorizedAccountStartIndex, 8, installmentAccountEndIndex - 1, 16);
+
 				curRowIndex++;
 
 			//	Last section...
-			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Credit Scores"); curRowIndex++;
+			addressTableStartIndex = curRowIndex;
+			setTableHeadModeToCell(worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4), "Current Address");
+			curRowIndex++;
+			worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4).value(personal.curAddress.split("\n").join(" ").trim());
+			curRowIndex++;
+
+			setTableHeadModeToCell(worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4), "Current Address");
+			curRowIndex ++;
+			for (var i = 0; i < personal.prevAddress.length; i ++) {
+				tempAdrr = personal.prevAddress[i];
+				worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4).value(tempAdrr.split("\n").join(" ").trim());
+				curRowIndex ++;
+			}
+			drawBorderToCells(addressTableStartIndex, 0, curRowIndex - 1, 4);
+
+			curRowIndex++;
+
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Credit Scores");
+			curRowIndex++;
+
+			drawBorderToCells(curRowIndex, 0, curRowIndex + 2, 2);
 
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Experian");
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(1), "Equifax");
@@ -689,13 +774,64 @@ var getStateCodeTable = function() {
 
 		createSummaryWorksheet: function(worksheet) {
 			var curRowIndex = 0,
-				self = this;
+				self = this,
+				setBoldToCell = function(cell, value, underlineFlag) {
+					cell.cellFormat().font().bold(true);
+					cell.value(value);
 
-			worksheet.rows(curRowIndex).cells(1).value("Tier 1");
-			worksheet.rows(curRowIndex).cells(2).value("Tier 2");
-			worksheet.rows(curRowIndex).cells(3).value("Tier 3");
-			worksheet.rows(curRowIndex).cells(6).value("Inputs");
-			worksheet.rows(curRowIndex).cells(9).value("Credit Score");
+					if (underlineFlag)
+						cell.cellFormat().font().underlineStyle($.ig.excel.FontUnderlineStyle.single);
+				},
+				fillBlueToCell = function(cell) {
+					cell.cellFormat().fill($.ig.excel.CellFill.createSolidFill('#92D050'));
+					return cell;
+				},
+				drawBorderToCells = function(r1, c1, r2, c2) {
+					for (var i = r1; i < r2 + 1; i ++) {
+						for (var j = c1; j < c2 + 1; j ++) {
+							format = worksheet.rows(i).cells(j).cellFormat();
+
+							format.topBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+							format.rightBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+							format.bottomBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+							format.leftBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
+						}
+					}
+				};
+
+			//	Column width Config
+
+				worksheet.columns(0).setWidth(38, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(1).setWidth(14.71, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(2).setWidth(14.71, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(3).setWidth(14.71, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(4).setWidth(3.43, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(5).setWidth(38, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(6).setWidth(9.43, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(7).setWidth(8.43, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(8).setWidth(8.43, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(9).setWidth(9.71, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(10).setWidth(6.14, $.ig.excel.WorksheetColumnWidthUnit.character);
+				worksheet.columns(11).setWidth(9.14, $.ig.excel.WorksheetColumnWidthUnit.character);
+
+			for (var i = 1; i < 24; i++) {
+				if (i !== 17) {
+					worksheet.rows(i).cells(6).cellFormat().fill($.ig.excel.CellFill.createSolidFill('#92D050'));
+				}
+			}
+
+			drawBorderToCells(0, 0, 26, 3);
+			drawBorderToCells(1, 5, 23, 7);
+			drawBorderToCells(2, 9, 3, 11);
+
+			defaultFormat = worksheet.columns(0, 11).cellFormat();
+			defaultFormat.font().height(fontSizeMapping['12']);
+
+			setBoldToCell(worksheet.rows(curRowIndex).cells(1), "Tier 1");
+			setBoldToCell(worksheet.rows(curRowIndex).cells(2), "Tier 2");
+			setBoldToCell(worksheet.rows(curRowIndex).cells(3), "Tier 3");
+			setBoldToCell(worksheet.rows(curRowIndex).cells(6), "Inputs");
+			setBoldToCell(worksheet.rows(curRowIndex).cells(9), "Credit Score");
 			curRowIndex++;
 
 			worksheet.rows(curRowIndex).cells(0).value("Credit Score");
@@ -732,56 +868,56 @@ var getStateCodeTable = function() {
 			curRowIndex++;
 
 			worksheet.rows(curRowIndex).cells(0).value("Minimum # of open Lines");
-			worksheet.rows(curRowIndex).cells(1).value("3");
-			worksheet.rows(curRowIndex).cells(2).value("2");
-			worksheet.rows(curRowIndex).cells(3).value("2");
+			worksheet.rows(curRowIndex).cells(1).value(3);
+			worksheet.rows(curRowIndex).cells(2).value(2);
+			worksheet.rows(curRowIndex).cells(3).value(2);
 			worksheet.rows(curRowIndex).cells(5).value("Minimum # of open Lines");
 			worksheet.rows(curRowIndex).cells(6).value(0);
 			worksheet.rows(curRowIndex).cells(7).applyFormula('=IF(AND($G$7>=0,$G$7<=1.9),"DECLINE",(IF(AND($G$7>=2,$G$7<=2.9),"Tier 2 Or Tier 3",(IF(AND($G$7>=3,$G$7<=99),"Tier 1",)))))');
 			curRowIndex++;
 
 			worksheet.rows(curRowIndex).cells(0).value("Minimum Age of Accounts (oldest)");
-			worksheet.rows(curRowIndex).cells(1).value("4");
-			worksheet.rows(curRowIndex).cells(2).value("2");
-			worksheet.rows(curRowIndex).cells(3).value("2");
+			worksheet.rows(curRowIndex).cells(1).value(4);
+			worksheet.rows(curRowIndex).cells(2).value(2);
+			worksheet.rows(curRowIndex).cells(3).value(2);
 			worksheet.rows(curRowIndex).cells(5).value("Minimum Age of Accounts (oldest)");
 			worksheet.rows(curRowIndex).cells(6).applyFormula("=Calculator!N" + self.summaryLineIndex);
 			worksheet.rows(curRowIndex).cells(7).applyFormula('=IF(AND($G$8>=0,$G$8<=1.9),"DECLINE",(IF(AND($G$8>=2,$G$8<=3.9),"Tier 2 Or Tier 3",(IF(AND($G$8>=4,$G$8<=99),"Tier 1",)))))');
 			curRowIndex++;
 
 			worksheet.rows(curRowIndex).cells(0).value("Max # of Inquiries/ per bureau (last 6 months)");
-			worksheet.rows(curRowIndex).cells(1).value("2");
-			worksheet.rows(curRowIndex).cells(2).value("4");
-			worksheet.rows(curRowIndex).cells(3).value("6");
+			worksheet.rows(curRowIndex).cells(1).value(2);
+			worksheet.rows(curRowIndex).cells(2).value(4);
+			worksheet.rows(curRowIndex).cells(3).value(6);
 			worksheet.rows(curRowIndex).cells(5).value("Max # of Inquiries/ per bureau (last 6 months)");
-			worksheet.rows(curRowIndex).cells(6).value("0");
+			worksheet.rows(curRowIndex).cells(6).value(0);
 			worksheet.rows(curRowIndex).cells(7).applyFormula('=IF(AND($G$9>=0,$G$9<=2),"Tier 1",(IF(AND($G$9>=2.1,$G$9<=4),"Tier 2 ",(IF(AND($G$9>=4.1,$G$9<=6),"Tier 3",(IF(AND($G$9>=6.1,$G$9<=99),"DECLINE")))))))');
 			curRowIndex++;
 
 			worksheet.rows(curRowIndex).cells(0).value("Max # Derogatories (last 2 years)");
-			worksheet.rows(curRowIndex).cells(1).value("0");
-			worksheet.rows(curRowIndex).cells(2).value("1");
-			worksheet.rows(curRowIndex).cells(3).value("3");
+			worksheet.rows(curRowIndex).cells(1).value(0);
+			worksheet.rows(curRowIndex).cells(2).value(1);
+			worksheet.rows(curRowIndex).cells(3).value(3);
 			worksheet.rows(curRowIndex).cells(5).value("Max # Deragatories 30 days late (last 2 years)");
-			worksheet.rows(curRowIndex).cells(6).value("0");
+			worksheet.rows(curRowIndex).cells(6).value(0);
 			worksheet.rows(curRowIndex).cells(7).applyFormula('=IF(AND($G$10>=0,$G$10<=0.9),"Tier 1",(IF(AND($G$10>=1,$G$10<=1.9),"Tier 2 ",(IF(AND($G$10>=2,$G$10<=3.9),"Tier 3",(IF(AND($G$10>=4,$G$10<=99),"DECLINE")))))))');
 			curRowIndex++;
 
 			worksheet.rows(curRowIndex).cells(0).value("Max # Deragatories 30 days late (last 2 years)");
-			worksheet.rows(curRowIndex).cells(1).value("0");
-			worksheet.rows(curRowIndex).cells(2).value("1");
-			worksheet.rows(curRowIndex).cells(3).value("3");
+			worksheet.rows(curRowIndex).cells(1).value(0);
+			worksheet.rows(curRowIndex).cells(2).value(1);
+			worksheet.rows(curRowIndex).cells(3).value(3);
 			worksheet.rows(curRowIndex).cells(5).value("Max # Deragatories 60 days late (last 2 years)");
-			worksheet.rows(curRowIndex).cells(6).value("0");
+			worksheet.rows(curRowIndex).cells(6).value(0);
 			worksheet.rows(curRowIndex).cells(7).applyFormula('=IF($G$11=0,"All Tiers","DECLINE")');
 			curRowIndex++;
 
 			worksheet.rows(curRowIndex).cells(0).value("Max # Deragatories 60 days late (last 2 years)");
-			worksheet.rows(curRowIndex).cells(1).value("0");
-			worksheet.rows(curRowIndex).cells(2).value("0");
-			worksheet.rows(curRowIndex).cells(3).value("0");
+			worksheet.rows(curRowIndex).cells(1).value(0);
+			worksheet.rows(curRowIndex).cells(2).value(0);
+			worksheet.rows(curRowIndex).cells(3).value(0);
 			worksheet.rows(curRowIndex).cells(5).value("Max # Derogatories (last 2 years)");
-			worksheet.rows(curRowIndex).cells(6).value("0");
+			worksheet.rows(curRowIndex).cells(6).value(0);
 			worksheet.rows(curRowIndex).cells(7).applyFormula('=IF(AND($G$12>=0,$G$12<=0.9),"Tier 1",(IF(AND($G$12>=1,$G$12<=1.9),"Tier 2 ",(IF(AND($G$12>=2,$G$12<=3.9),"Tier 3",(IF(AND($G$12>=4,$G$12<=99),"DECLINE")))))))');
 			curRowIndex++;
 			curRowIndex++;
@@ -801,7 +937,7 @@ var getStateCodeTable = function() {
 			worksheet.rows(curRowIndex).cells(2).value("3--6");
 			worksheet.rows(curRowIndex).cells(3).value("1--2");
 			worksheet.rows(curRowIndex).cells(5).value("# of Satisifed Accounts");
-			worksheet.rows(curRowIndex).cells(6).value("0");
+			worksheet.rows(curRowIndex).cells(6).value(0);
 			worksheet.rows(curRowIndex).cells(7).applyFormula('=IF(AND($G$16>=7,$G$16<=99),"Tier 1",(IF(AND($G$16>=3,$G$16<=6.9),"Tier 2 ",(IF(AND($G$16>=1,$G$16<=2.9),"Tier 3",(IF(AND($G$16>=0,$G$16<=0.9),"DECLINE")))))))');
 			curRowIndex++;
 
@@ -846,7 +982,7 @@ var getStateCodeTable = function() {
 			worksheet.rows(curRowIndex).cells(1).value("$60,000-$90,000");
 			worksheet.rows(curRowIndex).cells(2).value("$30,000- $75,000");
 			worksheet.rows(curRowIndex).cells(3).value("$10,000- $40,000");
-			worksheet.rows(curRowIndex).cells(5).value("Funding Holdbacks");
+			setBoldToCell(worksheet.rows(curRowIndex).cells(5), "Funding Holdbacks", true);
 			worksheet.rows(curRowIndex).cells(6).value("");
 			worksheet.rows(curRowIndex).cells(7).value('');
 			curRowIndex++;
@@ -863,7 +999,7 @@ var getStateCodeTable = function() {
 			worksheet.rows(curRowIndex).cells(5).value("Bankruptcies, Collections, Judgements ");
 			curRowIndex++;
 
-			worksheet.rows(curRowIndex).cells(0).value("Funding Holdbacks");
+			setBoldToCell(worksheet.rows(curRowIndex).cells(0), "Funding Holdbacks", true);
 			curRowIndex++;
 
 			worksheet.rows(curRowIndex).cells(0).value("Age of client");
@@ -882,9 +1018,16 @@ var getStateCodeTable = function() {
 		createStateCodesWorksheet: function(worksheet) {
 			var self = this;
 
+			worksheet.columns(0).setWidth(18, $.ig.excel.WorksheetColumnWidthUnit.character);
+			worksheet.columns(0).setWidth(3.14, $.ig.excel.WorksheetColumnWidthUnit.character);
+			worksheet.columns(0).setWidth(8.14, $.ig.excel.WorksheetColumnWidthUnit.character);
+
 			for (var i = 0; i < stateCodes.length; i++) {
 				for (var j = 0; j < stateCodes[i].length; j++) {
-					worksheet.rows(i).cells(j).value(stateCodes[i][j]);
+					if (j === 2)
+						worksheet.rows(i).cells(j).value(parseInt(stateCodes[i][j]));
+					else
+						worksheet.rows(i).cells(j).value(stateCodes[i][j]);
 				}
 			}
 		},
