@@ -478,9 +478,9 @@ var getStateCodeTable = function() {
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(2), "Transunion");
 			curRowIndex++;
 
-			worksheet.rows(curRowIndex).cells(0).value(self.scores.Experian);
-			worksheet.rows(curRowIndex).cells(1).value(self.scores.Equifax);
-			worksheet.rows(curRowIndex).cells(2).value(self.scores.Transunion);
+			worksheet.rows(curRowIndex).cells(0).value(parseInt(self.scores.Experian));
+			worksheet.rows(curRowIndex).cells(1).value(parseInt(self.scores.Equifax));
+			worksheet.rows(curRowIndex).cells(2).value(parseInt(self.scores.Transunion));
 			curRowIndex++;
 
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Age of Client");
@@ -849,9 +849,9 @@ var getStateCodeTable = function() {
 			worksheet.rows(curRowIndex).cells(11).value("Transunion");
 			curRowIndex++;
 
-			worksheet.rows(curRowIndex).cells(9).value(self.scores.Experian);
-			worksheet.rows(curRowIndex).cells(10).value(self.scores.Equifax);
-			worksheet.rows(curRowIndex).cells(11).value(self.scores.Transunion);
+			worksheet.rows(curRowIndex).cells(9).value(parseInt(self.scores.Experian));
+			worksheet.rows(curRowIndex).cells(10).value(parseInt(self.scores.Equifax));
+			worksheet.rows(curRowIndex).cells(11).value(parseInt(self.scores.Transunion));
 			curRowIndex++;
 
 			worksheet.rows(curRowIndex).cells(0).value("Debt to Credit Ratio");
