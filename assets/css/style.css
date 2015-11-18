@@ -5,3 +5,7 @@
 #exportButton {
 	float: left;
 }
+
+div.ui-igtrialwatermark {
+	display: none;
+}
