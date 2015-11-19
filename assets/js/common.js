@@ -163,6 +163,24 @@ var CreditReportExtractor = {
 						format.leftBorderColorInfo(new $.ig.excel.WorkbookColorInfo('#000000'));
 					}
 				}
+			},
+			getLatePaymentCommonValue = function(param) {
+				var result = {
+						30: "",
+						60: "",
+						90: ""
+					},
+					indArr = ['30', '60', '90'],
+					indTempArr = ['TransUnion', 'Experian', 'Equifax'];
+
+				for (var i = 0; i < indArr.length; i++) {
+					for (var j = 0; j < indTempArr.length; j++) {
+						if (param[indTempArr[j]][indArr[i]])
+							result[indArr[i]] = param[indTempArr[j]][indArr[i]];
+					}
+				}
+
+				return result;
 			};
 
 		//	Column Width Config
@@ -225,10 +243,13 @@ var CreditReportExtractor = {
 				tmpCell.applyFormula("=I" + (curRowIndex+1) + "/C" + (curRowIndex+1));
 				worksheet.rows(curRowIndex).cells(11).value(bankAccounts[i].opened);
 				worksheet.rows(curRowIndex).cells(12).applyFormula('=DATEDIF(L' + (curRowIndex+1) + ',TODAY(),"Y")');
-				worksheet.rows(curRowIndex).cells(13).value(bankAccounts[i].latePayments['30']);
-				worksheet.rows(curRowIndex).cells(14).value(bankAccounts[i].latePayments['60']);
-				worksheet.rows(curRowIndex).cells(15).value(bankAccounts[i].latePayments['90']);
-				worksheet.rows(curRowIndex).cells(16).value();
+				// worksheet.rows(curRowIndex).cells(13).value(bankAccounts[i].latePayments['30']);
+				// worksheet.rows(curRowIndex).cells(14).value(bankAccounts[i].latePayments['60']);
+				// worksheet.rows(curRowIndex).cells(15).value(bankAccounts[i].latePayments['90']);
+				lateDates = getLatePaymentCommonValue(bankAccounts[i].latePaymentDates);
+				worksheet.rows(curRowIndex).cells(13).value(lateDates['30']);
+				worksheet.rows(curRowIndex).cells(14).value(lateDates['60']);
+				worksheet.rows(curRowIndex).cells(15).value(lateDates['90']);
 				curRowIndex++;
 			}
 			bankAccountEndIndex = curRowIndex;
@@ -330,10 +351,13 @@ var CreditReportExtractor = {
 
 				worksheet.rows(curRowIndex).cells(8).value(item.opened);
 				worksheet.rows(curRowIndex).cells(9).value(item.reported);
-				worksheet.rows(curRowIndex).cells(10).value(item.latePayments[30]);
-				worksheet.rows(curRowIndex).cells(11).value(item.latePayments[60]);
-				worksheet.rows(curRowIndex).cells(12).value(item.latePayments[90]);
-				worksheet.rows(curRowIndex).cells(13).value();
+				// worksheet.rows(curRowIndex).cells(10).value(item.latePayments[30]);
+				// worksheet.rows(curRowIndex).cells(11).value(item.latePayments[60]);
+				// worksheet.rows(curRowIndex).cells(12).value(item.latePayments[90]);
+				lateDates = getLatePaymentCommonValue(item.latePaymentDates);
+				worksheet.rows(curRowIndex).cells(13).value(lateDates['30']);
+				worksheet.rows(curRowIndex).cells(14).value(lateDates['60']);
+				worksheet.rows(curRowIndex).cells(15).value(lateDates['90']);
 				curRowIndex++;
 			}
 
