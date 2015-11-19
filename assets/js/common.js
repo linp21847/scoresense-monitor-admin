@@ -355,9 +355,9 @@ var CreditReportExtractor = {
 				// worksheet.rows(curRowIndex).cells(11).value(item.latePayments[60]);
 				// worksheet.rows(curRowIndex).cells(12).value(item.latePayments[90]);
 				lateDates = getLatePaymentCommonValue(item.latePaymentDates);
-				worksheet.rows(curRowIndex).cells(13).value(lateDates['30']);
-				worksheet.rows(curRowIndex).cells(14).value(lateDates['60']);
-				worksheet.rows(curRowIndex).cells(15).value(lateDates['90']);
+				worksheet.rows(curRowIndex).cells(10).value(lateDates['30']);
+				worksheet.rows(curRowIndex).cells(11).value(lateDates['60']);
+				worksheet.rows(curRowIndex).cells(12).value(lateDates['90']);
 				curRowIndex++;
 			}
 
