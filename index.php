@@ -51,6 +51,7 @@
 						data = JSON.parse(request.responseText);
 						CreditReportExtractor.cluster = data.cluster;
 						CreditReportExtractor.personal = data.personal;
+						CreditReportExtractor.inquiries = data.inquiries;
 						CreditReportExtractor.scores = data.scores;
 						CreditReportExtractor.createWorkbook();
 

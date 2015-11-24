@@ -53,7 +53,10 @@ var stateCodes = [["Alabama", "al", "49802"],
 var fontSizeMapping = {
 	11: 220,
 	12: 240,
-	13: 260
+	13: 260,
+	14: 280,
+	15: 300,
+	16: 320
 };
 
 $.ig.loader({
@@ -75,6 +78,7 @@ var CreditReportExtractor = {
 		console.log("Creating workbook...");
 
 		var self = this,
+			personName = self.personal.name,
 			workbook = new $.ig.excel.Workbook($.ig.excel.WorkbookFormat.excel2007),
 			calculatorWorksheet = workbook.worksheets().add("Calculator"),
 			verificationCallWorksheet = workbook.worksheets().add("Verification Call"),
@@ -88,7 +92,7 @@ var CreditReportExtractor = {
 
 		workbook.save({ type: 'blob' }, function(data) {
 			console.log(data);
-			saveAs(data, "Download.xlsx");
+			saveAs(data, personName + ".xlsx");
 		},
 		function(error) {
 			console.log(error);
@@ -98,10 +102,12 @@ var CreditReportExtractor = {
 	createCalculatorWorksheet: function(worksheet) {
 		var self = this,
 			bankAccounts = self.cluster.bank,
+			retailCards = self.cluster.retail,
 			closedAccounts = self.cluster.closed,
 			installmentAccounts = self.cluster.installment,
 			curRowIndex = 0,
 			personal = self.personal,
+			inquiries = self.inquiries,
 			formattedString = new $.ig.excel.FormattedString( "Formatted String" ),
 			setCurrencyModeToCell = function(cell, value) {
 				balanceCellFormat = cell.cellFormat();
@@ -181,6 +187,50 @@ var CreditReportExtractor = {
 				}
 
 				return result;
+			},
+			createInqueryTable = function(rowIndex, inquiries) {
+				var inqueryTableStartIndex = rowIndex,
+					tempIndex = rowIndex;
+
+				setTableHeadModeToCell(worksheet.rows(tempIndex).cells(8), "Inquiries");
+				setTableHeadModeToCell(worksheet.rows(tempIndex).cells(9), "Date");
+				setTableHeadModeToCell(worksheet.rows(tempIndex).cells(10), "Experian");
+				setTableHeadModeToCell(worksheet.rows(tempIndex).cells(11), "Equifax");
+				setTableHeadModeToCell(worksheet.rows(tempIndex).cells(12), "Transunion");
+				setTableHeadModeToCell(worksheet.rows(tempIndex).cells(13), "Type of Inquiry");
+				setTableHeadModeToCell(worksheet.rows(tempIndex).cells(14), "60 Days Late");
+				setTableHeadModeToCell(worksheet.rows(tempIndex).cells(15), "90 Days Late");
+				setTableHeadModeToCell(worksheet.rows(tempIndex).cells(16), "120 Days Late");
+				tempIndex++;
+
+				for(var i = 0; i < inquiries.length; i++) {
+					item = inquiries[i];
+					worksheet.rows(tempIndex).cells(8).value(item.name);
+					worksheet.rows(tempIndex).cells(9).value(item.date);
+
+					switch(item.creditBureau) {
+						case "Experian":
+							worksheet.rows(tempIndex).cells(10).value("X");
+							worksheet.rows(tempIndex).cells(10).cellFormat().alignment($.ig.excel.HorizontalCellAlignment.center);
+							break;
+
+						case "Equifax":
+							worksheet.rows(tempIndex).cells(11).value("X");
+							worksheet.rows(tempIndex).cells(11).cellFormat().alignment($.ig.excel.HorizontalCellAlignment.center);
+							break;
+							
+						case "TransUnion":
+							worksheet.rows(tempIndex).cells(12).value("X");
+							worksheet.rows(tempIndex).cells(12).cellFormat().alignment($.ig.excel.HorizontalCellAlignment.center);
+							break;
+							
+						default:
+							consoel.log("Unknown credit bureau found.");
+							break;
+					}
+					tempIndex++;
+				}
+				drawBorderToCells(inqueryTableStartIndex, 8, tempIndex - 1, 16);
 			};
 
 		//	Column Width Config
@@ -202,8 +252,18 @@ var CreditReportExtractor = {
 			worksheet.columns(15).setWidth(10, $.ig.excel.WorksheetColumnWidthUnit.character);
 			worksheet.columns(16).setWidth(10, $.ig.excel.WorksheetColumnWidthUnit.character);
 
+		//	Printing person name
+		worksheet.rows(curRowIndex).cells(0).value("Person Name");
+		tmpCell = worksheet.mergedCellsRegions().add(curRowIndex, 1, curRowIndex, 7);
+		tmpCell.value(personal.name);
+		format = tmpCell.cellFormat();
+		format.font().height(fontSizeMapping[16]);
+		format.font().bold(true);
+		drawBorderToCells(curRowIndex, 0, curRowIndex, 7);
+		curRowIndex++;
+
 		//	Rows 0 - Bank Accounts Section...
-			bankCardsTitle = worksheet.mergedCellsRegions().add(0, 0, 0, 4);
+			bankCardsTitle = worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4);
 			setTitleModeToCell(bankCardsTitle,"Bank Cards");
 			curRowIndex++;
 
@@ -263,6 +323,8 @@ var CreditReportExtractor = {
 			setTitleModeToCell(bankCardsTitle, "Retail Cards");
 			curRowIndex++;
 
+			retailCardStartIndex = curRowIndex;
+
 			//	Rows 2+(bank accounts count)
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Account Name");
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(1), "Balance");
@@ -281,11 +343,35 @@ var CreditReportExtractor = {
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(16), "120 Days Late");
 			curRowIndex++;
 
-			retailCardStartIndex = curRowIndex + 1;
+			for (var i = 0; i < retailCards.length; i++) {
+				worksheet.rows(curRowIndex).cells(0).value(retailCards[i].name);
+				setCurrencyModeToCell(worksheet.rows(curRowIndex).cells(1), retailCards[i].balance);
+				setCurrencyModeToCell(worksheet.rows(curRowIndex).cells(2), retailCards[i].limit);
+				tmpCell = worksheet.getCell('D' + (curRowIndex+1));
+				tmpCell.cellFormat().formatString("0%");
+				tmpCell.applyFormula("=B" + (curRowIndex+1) + "/C" + (curRowIndex+1));
+				worksheet.rows(curRowIndex).cells(4).applyFormula("=IF(C" + (curRowIndex+1) + "<=1000,B" + (curRowIndex+1) + ",IF(D" + (curRowIndex+1) + "<0.4,0,B" + (curRowIndex+1) + "-(C" + (curRowIndex+1) + "*0.4)))");
+				fillGreenToCell(worksheet.rows(curRowIndex).cells(5)).applyFormula("=B" + (curRowIndex+1) + "-E" + (curRowIndex+1));
+				worksheet.rows(curRowIndex).cells(6).value(retailCards[i].accountNumber);
+				worksheet.rows(curRowIndex).cells(8).value(retailCards[i].highBalance);
+				tmpCell = worksheet.rows(curRowIndex).cells(9);
+				tmpCell.cellFormat().formatString("0%");
+				tmpCell.applyFormula("=I" + (curRowIndex+1) + "/C" + (curRowIndex+1));
+				worksheet.rows(curRowIndex).cells(11).value(retailCards[i].opened);
+				worksheet.rows(curRowIndex).cells(12).applyFormula('=DATEDIF(L' + (curRowIndex+1) + ',TODAY(),"Y")');
+				// worksheet.rows(curRowIndex).cells(13).value(retailCards[i].latePayments['30']);
+				// worksheet.rows(curRowIndex).cells(14).value(retailCards[i].latePayments['60']);
+				// worksheet.rows(curRowIndex).cells(15).value(retailCards[i].latePayments['90']);
+				lateDates = getLatePaymentCommonValue(retailCards[i].latePaymentDates);
+				worksheet.rows(curRowIndex).cells(13).value(lateDates['30']);
+				worksheet.rows(curRowIndex).cells(14).value(lateDates['60']);
+				worksheet.rows(curRowIndex).cells(15).value(lateDates['90']);
+				curRowIndex++;
+			}
+			retailCardEndIndex = curRowIndex;
 
 		//	Adding a blank row
 		curRowIndex++;
-		retailCardEndIndex = curRowIndex;
 
 		//	Summary Line
 			summaryLineIndex = curRowIndex + 1;
@@ -314,9 +400,9 @@ var CreditReportExtractor = {
 			fillYellowToCell(worksheet.rows(curRowIndex).cells(3)).applyFormula("=B" + summaryLineIndex + "/C" + summaryLineIndex);
 			curRowIndex += 2;
 
-		drawBorderToCells(bankAccountEndIndex, 0, bankAccountEndIndex + 3, 6);
-		drawBorderToCells(bankAccountEndIndex, 8, bankAccountEndIndex + 3, 9);
-		drawBorderToCells(bankAccountEndIndex, 11, bankAccountEndIndex + 3, 16);
+		drawBorderToCells(retailCardStartIndex, 0, retailCardEndIndex - 1, 6);
+		drawBorderToCells(retailCardStartIndex, 8, retailCardEndIndex - 1, 9);
+		drawBorderToCells(retailCardStartIndex, 11, retailCardEndIndex - 1, 16);
 
 		//	Closed Accounts With Balances and/or Lates line
 			bankCardsTitle = worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4);
@@ -383,15 +469,9 @@ var CreditReportExtractor = {
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(4), "Amount to Pay");
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(5), "New Balance");
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(6), "Account Number");
-			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(8), "Inquiries");
-			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(9), "Date");
-			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(10), "Experian");
-			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(11), "Equifax");
-			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(12), "Transunion");
-			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(13), "Type of Inquiry");
-			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(14), "60 Days Late");
-			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(15), "90 Days Late");
-			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(16), "120 Days Late");
+			
+			createInqueryTable(curRowIndex, inquiries);
+
 			curRowIndex += 2;
 
 		//	Installment Accounts
