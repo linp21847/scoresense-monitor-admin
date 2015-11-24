@@ -104,9 +104,12 @@ var CreditReportExtractor = {
 			bankAccounts = self.cluster.bank,
 			retailCards = self.cluster.retail,
 			closedAccounts = self.cluster.closed,
+			authorized = self.cluster.authorized,
 			installmentAccounts = self.cluster.installment,
+			fraud = self.fraud,
 			curRowIndex = 0,
 			personal = self.personal,
+			publicRecords = self.public,
 			inquiries = self.inquiries,
 			formattedString = new $.ig.excel.FormattedString( "Formatted String" ),
 			setCurrencyModeToCell = function(cell, value) {
@@ -240,7 +243,7 @@ var CreditReportExtractor = {
 			worksheet.columns(3).setWidth(15.71, $.ig.excel.WorksheetColumnWidthUnit.character);
 			worksheet.columns(4).setWidth(12.71, $.ig.excel.WorksheetColumnWidthUnit.character);
 			worksheet.columns(5).setWidth(14, $.ig.excel.WorksheetColumnWidthUnit.character);
-			worksheet.columns(6).setWidth(14.14, $.ig.excel.WorksheetColumnWidthUnit.character);
+			worksheet.columns(6).setWidth(18, $.ig.excel.WorksheetColumnWidthUnit.character);
 			worksheet.columns(7).setWidth(7.57, $.ig.excel.WorksheetColumnWidthUnit.character);
 			worksheet.columns(8).setWidth(15.43, $.ig.excel.WorksheetColumnWidthUnit.character);
 			worksheet.columns(9).setWidth(12.71, $.ig.excel.WorksheetColumnWidthUnit.character);
@@ -253,14 +256,14 @@ var CreditReportExtractor = {
 			worksheet.columns(16).setWidth(10, $.ig.excel.WorksheetColumnWidthUnit.character);
 
 		//	Printing person name
-		worksheet.rows(curRowIndex).cells(0).value("Person Name");
-		tmpCell = worksheet.mergedCellsRegions().add(curRowIndex, 1, curRowIndex, 7);
-		tmpCell.value(personal.name);
-		format = tmpCell.cellFormat();
-		format.font().height(fontSizeMapping[16]);
-		format.font().bold(true);
-		drawBorderToCells(curRowIndex, 0, curRowIndex, 7);
-		curRowIndex++;
+			worksheet.rows(curRowIndex).cells(0).value("Person Name");
+			tmpCell = worksheet.mergedCellsRegions().add(curRowIndex, 1, curRowIndex, 7);
+			tmpCell.value(personal.name);
+			format = tmpCell.cellFormat();
+			format.font().height(fontSizeMapping[16]);
+			format.font().bold(true);
+			drawBorderToCells(curRowIndex, 0, curRowIndex, 7);
+			curRowIndex++;
 
 		//	Rows 0 - Bank Accounts Section...
 			bankCardsTitle = worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4);
@@ -459,8 +462,6 @@ var CreditReportExtractor = {
 
 			authorizedAccountStartIndex = curRowIndex;
 
-			drawBorderToCells(authorizedAccountStartIndex, 0, authorizedAccountStartIndex + 1, 6);
-
 			//	Rows 
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Account Name");
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(1), "Balance");
@@ -469,10 +470,27 @@ var CreditReportExtractor = {
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(4), "Amount to Pay");
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(5), "New Balance");
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(6), "Account Number");
-			
 			createInqueryTable(curRowIndex, inquiries);
+			curRowIndex++;
+			
+			for (var i = 0; i < authorized.length; i++) {
+				var item = authorized[i];
 
-			curRowIndex += 2;
+				worksheet.rows(curRowIndex).cells(0).value(item.name);
+				setCurrencyModeToCell(worksheet.rows(curRowIndex).cells(1), item.balance);
+				setCurrencyModeToCell(worksheet.rows(curRowIndex).cells(2), item.limit);
+				tmpCell = worksheet.getCell('D' + (curRowIndex+1));
+				tmpCell.cellFormat().formatString("0%");
+				tmpCell.applyFormula("=B" + (curRowIndex+1) + "/C" + (curRowIndex+1));
+				worksheet.rows(curRowIndex).cells(4).applyFormula("=IF(C" + (curRowIndex+1) + "<=1000,B" + (curRowIndex+1) + ",IF(D" + (curRowIndex+1) + "<0.4,0,B" + (curRowIndex+1) + "-(C" + (curRowIndex+1) + "*0.4)))");
+				fillGreenToCell(worksheet.rows(curRowIndex).cells(5)).applyFormula("=B" + (curRowIndex+1) + "-E" + (curRowIndex+1));
+				worksheet.rows(curRowIndex).cells(6).value(item.accountNumber);
+				curRowIndex++;
+			}
+
+			drawBorderToCells(authorizedAccountStartIndex, 0, curRowIndex - 1, 6);
+
+			curRowIndex ++;
 
 		//	Installment Accounts
 			installmentAccountTitle = worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4);
@@ -509,42 +527,100 @@ var CreditReportExtractor = {
 			curRowIndex++;
 
 		//	Last section...
-		addressTableStartIndex = curRowIndex;
-		setTableHeadModeToCell(worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4), "Current Address");
-		curRowIndex++;
-		worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4).value(personal.curAddress.split("\n").join(" ").trim());
-		curRowIndex++;
 
-		setTableHeadModeToCell(worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4), "Current Address");
-		curRowIndex ++;
-		for (var i = 0; i < personal.prevAddress.length; i ++) {
-			tempAdrr = personal.prevAddress[i];
-			worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4).value(tempAdrr.split("\n").join(" ").trim());
+		//	Public records section
+			setTitleModeToCell(worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4), "Public Records");
+			curRowIndex++;
+
+			publicRecordsStartIndex = curRowIndex;
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Account Name");
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(1), "Type");
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(2), "Date");
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(3), "Status");
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(4), "Amount");
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(5), "Account");
+			curRowIndex++;
+
+			for(var i = 0; i < publicRecords.length; i ++) {
+				item = publicRecords[i];
+
+				worksheet.rows(curRowIndex).cells(0).value(item.name);
+				worksheet.rows(curRowIndex).cells(1).value(item.type);
+				worksheet.rows(curRowIndex).cells(2).value(item.date);
+				worksheet.rows(curRowIndex).cells(3).value(item.status);
+				setCurrencyModeToCell(worksheet.rows(curRowIndex).cells(4), item.amount);
+				worksheet.rows(curRowIndex).cells(5).value(item.accountNumber);				
+				curRowIndex++;
+			}
+
+			drawBorderToCells(publicRecordsStartIndex, 0, curRowIndex - 1, 5);
+
 			curRowIndex ++;
-		}
-		drawBorderToCells(addressTableStartIndex, 0, curRowIndex - 1, 4);
 
-		curRowIndex++;
 
-		setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Credit Scores");
-		curRowIndex++;
+		//	Address section
+			addressTableStartIndex = curRowIndex;
+			setTableHeadModeToCell(worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4), "Current Address");
+			curRowIndex++;
+			worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4).value(personal.curAddress.split("\n").join(" ").trim());
+			curRowIndex++;
 
-		drawBorderToCells(curRowIndex, 0, curRowIndex + 2, 2);
+			setTableHeadModeToCell(worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4), "Previous Address");
+			curRowIndex ++;
+			for (var i = 0; i < personal.prevAddress.length; i ++) {
+				tempAdrr = personal.prevAddress[i];
+				worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 4).value(tempAdrr.split("\n").join(" ").trim());
+				curRowIndex ++;
+			}
+			drawBorderToCells(addressTableStartIndex, 0, curRowIndex - 1, 4);
 
-		setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Experian");
-		setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(1), "Equifax");
-		setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(2), "Transunion");
-		curRowIndex++;
+			curRowIndex++;
 
-		worksheet.rows(curRowIndex).cells(0).value(parseInt(self.scores.Experian));
-		worksheet.rows(curRowIndex).cells(1).value(parseInt(self.scores.Equifax));
-		worksheet.rows(curRowIndex).cells(2).value(parseInt(self.scores.Transunion));
-		curRowIndex++;
+		//	Fraud alert section
+			setTableHeadModeToCell(worksheet.mergedCellsRegions().add(curRowIndex, 0, curRowIndex, 6), "Fraud Alert");
+			curRowIndex++;
+			fraudAlertStartIndex = curRowIndex;
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Bureau");
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(1), "Date");
+			setTableHeadModeToCell(worksheet.mergedCellsRegions().add(curRowIndex, 2, curRowIndex, 6), "Statement");
+			curRowIndex++;
 
-		setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Age of Client");
-		worksheet.rows(curRowIndex).cells(1).value(self.personal.birthday);
-		worksheet.rows(curRowIndex).cells(2).applyFormula('=2015-B' + (curRowIndex + 1));
-		self.yearBornLineInxex = curRowIndex + 1;
+			worksheet.rows(curRowIndex).cells(0).value("Transunion");
+			worksheet.mergedCellsRegions().add(curRowIndex, 2, curRowIndex, 6).value(fraud.TransUnion);
+			curRowIndex++;
+
+			worksheet.rows(curRowIndex).cells(0).value("Experian");
+			worksheet.mergedCellsRegions().add(curRowIndex, 2, curRowIndex, 6).value(fraud.Experian);
+			curRowIndex++;
+
+			worksheet.rows(curRowIndex).cells(0).value("Equifax");
+			worksheet.mergedCellsRegions().add(curRowIndex, 2, curRowIndex, 6).value(fraud.Equifax);
+			curRowIndex++;
+
+			drawBorderToCells(fraudAlertStartIndex, 0, curRowIndex - 1, 6);
+
+			curRowIndex++;
+
+		// Credit scroes section
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Credit Scores");
+			curRowIndex++;
+
+			drawBorderToCells(curRowIndex, 0, curRowIndex + 2, 2);
+
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Experian");
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(1), "Equifax");
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(2), "Transunion");
+			curRowIndex++;
+
+			worksheet.rows(curRowIndex).cells(0).value(parseInt(self.scores.Experian));
+			worksheet.rows(curRowIndex).cells(1).value(parseInt(self.scores.Equifax));
+			worksheet.rows(curRowIndex).cells(2).value(parseInt(self.scores.Transunion));
+			curRowIndex++;
+
+			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(0), "Age of Client");
+			worksheet.rows(curRowIndex).cells(1).value(self.personal.birthday);
+			worksheet.rows(curRowIndex).cells(2).applyFormula('=2015-B' + (curRowIndex + 1));
+			self.yearBornLineInxex = curRowIndex + 1;
 	},
 
 	createVerificationCallWorksheet: function(worksheet) {

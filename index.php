@@ -50,9 +50,11 @@
 						});
 						data = JSON.parse(request.responseText);
 						CreditReportExtractor.cluster = data.cluster;
+						CreditReportExtractor.fraud = data.fraud;
 						CreditReportExtractor.personal = data.personal;
 						CreditReportExtractor.inquiries = data.inquiries;
 						CreditReportExtractor.scores = data.scores;
+						CreditReportExtractor.public = data.public;
 						CreditReportExtractor.createWorkbook();
 
 						localStorage.setItem("export_time", JSON.stringify((new Date()).getTime()));
