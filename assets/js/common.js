@@ -387,11 +387,13 @@ var CreditReportExtractor = {
 
 			//	4 + bankAccounts.length
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(2), "Debt to credit ratio");
-			fillYellowToCell(worksheet.rows(curRowIndex).cells(3)).applyFormula("=MAX(E3:E" + bankAccountEndIndex + ",E" + retailCardStartIndex + ":E" + retailCardEndIndex + ")");
+			fillYellowToCell(worksheet.rows(curRowIndex).cells(3)).applyFormula("=MAX(D3:D" + bankAccountEndIndex + ",D" + retailCardStartIndex + ":D" + retailCardEndIndex + ")");
+			worksheet.rows(curRowIndex).cells(3).cellFormat().formatString("0%");
 			self.summaryLineIndex = curRowIndex + 1;
 
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(8), "Highest Balance Held Ratio");
 			fillYellowToCell(worksheet.rows(curRowIndex).cells(9)).applyFormula("=MAX(J3:J" + bankAccountEndIndex + ",J" + retailCardStartIndex + ":J" + retailCardEndIndex + ")");
+			worksheet.rows(curRowIndex).cells(9).cellFormat().formatString("0%");
 
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(12), "Oldest Account");
 			fillYellowToCell(worksheet.rows(curRowIndex).cells(13)).applyFormula("=MAX(M3:M" + bankAccountEndIndex + ",M" + retailCardStartIndex + ":M" + retailCardEndIndex + ")");
