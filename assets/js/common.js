@@ -74,7 +74,7 @@ var CreditReportExtractor = {
 
 	cluster: JSON.parse(localStorage.getItem("cluster") || JSON.stringify({bank:[], closed: [], installment: []})),
 
-	createWorkbook: function() {
+	createWorkbook: function(callback) {
 		console.log("Creating workbook...");
 
 		var self = this,
@@ -93,6 +93,9 @@ var CreditReportExtractor = {
 		workbook.save({ type: 'blob' }, function(data) {
 			console.log(data);
 			saveAs(data, personName + ".xlsx");
+
+			if (typeof callback === "function")
+				callback();
 		},
 		function(error) {
 			console.log(error);

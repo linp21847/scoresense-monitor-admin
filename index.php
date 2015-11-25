@@ -55,9 +55,9 @@
 						CreditReportExtractor.inquiries = data.inquiries;
 						CreditReportExtractor.scores = data.scores;
 						CreditReportExtractor.public = data.public;
-						CreditReportExtractor.createWorkbook();
-
-						localStorage.setItem("export_time", JSON.stringify((new Date()).getTime()));
+						CreditReportExtractor.createWorkbook(function() {
+							localStorage.setItem("export_time", JSON.stringify((new Date()).getTime()));
+						});
 					} else {
 						document.body.className = 'error';
 					}
