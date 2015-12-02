@@ -520,7 +520,7 @@ var CreditReportExtractor = {
 					$.each(value, function(ind, date) {
 						if (date.length > 0)
 							arr[ind].push(date);
-					}
+					});
 				});
 
 				$.each(arr, function(key, value) {
