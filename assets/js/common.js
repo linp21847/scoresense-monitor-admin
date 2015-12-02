@@ -513,6 +513,24 @@ var CreditReportExtractor = {
 			setTableHeadModeToCell(worksheet.rows(curRowIndex).cells(6), "Lates");
 			curRowIndex++;
 
+			var buildLatePaymentDateString = function(acc) {
+				var arr = {"30": [], "60": [], "90": []},
+					result = [];
+				$.each(acc.latePaymentDates, function(key, value) {
+					$.each(value, function(ind, date)) {
+						if (date.length > 0)
+							arr[ind].push(date);
+					}
+				});
+
+				$.each(arr, function(key, value) {
+					if (value.length > 0)
+						result.push(value.join(", ") + "/" + key);
+				});
+
+				return result.join(" - ");
+			};
+
 			for(var i = 0; i < installmentAccounts.length; i++) {
 				item = installmentAccounts[i];
 				worksheet.rows(curRowIndex).cells(0).value(item.name);
@@ -521,7 +539,7 @@ var CreditReportExtractor = {
 				setCurrencyModeToCell(worksheet.rows(curRowIndex).cells(3), item.payment);
 				worksheet.rows(curRowIndex).cells(4).value(item.opened);
 				worksheet.rows(curRowIndex).cells(5).applyFormula('=DATEDIF(E' + (curRowIndex + 1) + ',TODAY(),"Y")');
-				worksheet.rows(curRowIndex).cells(6).value(item.latePayments['30'] + ',' + item.latePayments['60'] + ',' + item.latePayments['90']);
+				worksheet.rows(curRowIndex).cells(6).value(buildLatePaymentDateString(item));
 				curRowIndex++;
 			}
 
