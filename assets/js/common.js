@@ -517,7 +517,7 @@ var CreditReportExtractor = {
 				var arr = {"30": [], "60": [], "90": []},
 					result = [];
 				$.each(acc.latePaymentDates, function(key, value) {
-					$.each(value, function(ind, date)) {
+					$.each(value, function(ind, date) {
 						if (date.length > 0)
 							arr[ind].push(date);
 					}
