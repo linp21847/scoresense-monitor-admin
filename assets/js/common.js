@@ -92,7 +92,7 @@ var CreditReportExtractor = {
 
 		workbook.save({ type: 'blob' }, function(data) {
 			console.log(data);
-			saveAs(data, personName + ".xlsx");
+			saveAs(data, personName.substr(0, 30) + ".xlsx");
 
 			if (typeof callback === "function")
 				callback();
